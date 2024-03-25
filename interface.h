@@ -7,3 +7,5 @@
 #endif
 */
 #pragma once
+
+int term_setup(void);
