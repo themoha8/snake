@@ -36,11 +36,11 @@ int main(void)
 			return res;
 		}
 		// game while
-		while ((game_controller(in_handle)) != game_over) {
-			Sleep(2000);
+		while ((game_controller(in_handle, &snake)) != game_over) {
+			game_update(&snake);
 		}
 	}
 
-	Sleep(10000);
+//	Sleep(10000);
 	return 0;
 }
