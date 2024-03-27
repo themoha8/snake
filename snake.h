@@ -7,6 +7,12 @@
 #endif
 */
 #pragma once
+#include "interface.h"
+
+enum game_t {
+	game_over = 0,
+	playing = 1,
+};
 
 struct snake_t {
 	int coord_x;
@@ -16,4 +22,6 @@ struct snake_t {
 };
 
 int game_init(HANDLE out_handle, struct snake_t* snake);
+enum game_t game_controller(HANDLE in_handle);
 static void score(int value);
+static void key_check(HANDLE in_handle, wchar_t* pressed_key);

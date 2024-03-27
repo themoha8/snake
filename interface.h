@@ -11,7 +11,7 @@
 enum choice_t {
 	error = 0,
 	start_choice = 1,
-	exit_choice = 2
+	exit_choice = 2,
 };
 
 int term_setup(HANDLE out_handle);

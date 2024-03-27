@@ -4,7 +4,8 @@
 #include "snake.h"
 
 enum {
-	snake_speed = 10
+	snake_speed = 10,
+	esc_key = 27
 };
 
 enum direction_t {
@@ -34,6 +35,10 @@ int game_init(HANDLE out_handle, struct snake_t *snake)
 	}
 	CloseHandle(file_handle);
 
+	// draw help
+	wprintf_s(L"\x1b[22;55H");
+	wprintf_s(L"escape key - exit to menu");
+
 	// draw score
 	score(0);
 
@@ -61,7 +66,45 @@ static void score(int value)
 	wprintf_s(L"Score: %d", value);
 }
 
-static void draw_snake(void)
+static void key_check(HANDLE in_handle, wchar_t *pressed_key)
 {
+	INPUT_RECORD in_buf;
+	DWORD num_of_events;
 
+	// clear key
+	*pressed_key = L'0';
+
+	PeekConsoleInputW(in_handle, &in_buf, 1, &num_of_events);
+	if (num_of_events > 0) {
+		ReadConsoleInputW(in_handle, &in_buf, 1, &num_of_events);
+		*pressed_key = in_buf.Event.KeyEvent.uChar.UnicodeChar;
+	}
+
+}
+
+/*
+static int key_event(HANDLE in_handle)
+{
+	wchar_t pressed_key;
+	key_check(in_handle, &pressed_key);
+	if (pressed_key = esc_key);
+
+}
+*/
+
+//void game_controller(HANDLE in_handle)
+//{
+	//key_event();
+
+//}
+
+enum game_t game_controller(HANDLE in_handle)
+{
+	wchar_t pressed_key;
+
+	key_check(in_handle, &pressed_key);
+	if (pressed_key == esc_key) {
+		return game_over;
+	}
+	return playing;
 }
