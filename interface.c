@@ -54,13 +54,9 @@ enum choice_t menu(HANDLE in_handle)
 	wchar_t pressed_key = L'0'; // undef
 	INPUT_RECORD in_buf;
 	DWORD num_of_events;
-	wchar_t file_music_name[256];
 
 	// clear screen
 	wprintf_s(L"\x1b[2J");
-
-	GetCurrentDirectoryW(_countof(file_music_name), file_music_name);
-	_snwprintf_s(file_music_name, _countof(file_music_name), _countof(file_music_name), L"%s\\res\\Click.wav", file_music_name);
 	
 	while (pressed_key != enter_key) {
 		// draw color
@@ -83,17 +79,15 @@ enum choice_t menu(HANDLE in_handle)
 			choice--; // choice = start_choice
 			start_color = t_blue;
 			exit_color = t_white;
-		//	PlaySoundW(L"res\\Click.wav", NULL, SND_FILENAME | SND_ASYNC);
-			PlaySoundW(file_music_name, NULL, SND_FILENAME | SND_ASYNC);
-			Sleep(250); // pause
+			PlaySoundW(L"res\\Click.wav", NULL, SND_FILENAME | SND_ASYNC);
+			Sleep(350); // pause
 		}
 		else if ((pressed_key == L's' || pressed_key == L'S') && choice == start_choice) {
 			choice++; // choice = exit_choice
 			start_color = t_white;
 			exit_color = t_blue;
-		//	PlaySoundW(L"res\\Click.wav", NULL, SND_FILENAME | SND_ASYNC);
-			PlaySoundW(file_music_name, NULL, SND_FILENAME | SND_ASYNC);
-			Sleep(250); // pause
+			PlaySoundW(L"res\\Click.wav", NULL, SND_FILENAME | SND_ASYNC);
+			Sleep(350); // pause
 		}
 	}
 	// clear screen

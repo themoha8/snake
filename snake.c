@@ -54,7 +54,7 @@ int game_init(HANDLE out_handle, struct snake_t *snake)
 	snake->coord_x = 80 / 2;
 	snake->coord_y = 21 / 2;
 	snake->direction = stop;
-	snake->speed = snake_speed;
+	snake->speed = 100; //snake_speed;
 
 	draw_snake(snake->coord_x, snake->coord_y);
 
@@ -121,7 +121,7 @@ enum game_t game_controller(HANDLE in_handle, struct snake_t *snake)
 	if (snake->direction == crashed) {
 		return game_over;
 	}
-	Sleep(50);
+	Sleep(16);
 	return playing;
 }
 
@@ -138,17 +138,17 @@ void game_update(struct snake_t *snake)
 	wprintf_s(L"\x1b[%d;%dH", snake->coord_y, snake->coord_x);
 	// clear snake
 	putwchar(L' ');
-
+	Sleep(2000);
 	if (snake->direction == L'w' || snake->direction == L'W') {
 		tmp_y--;
-		if (tmp_y == 0 || tmp_y == 21)
+		if (tmp_y == 1)
 			snake->direction = crashed;
 		else
 			snake->coord_y = tmp_y;
 	}
 	else if (snake->direction == L'a' || snake->direction == L'A') {
 		tmp_x--;
-		if (tmp_x == 0) // wall
+		if (tmp_x == 1) // wall
 			snake->direction = crashed;
 		else
 			snake->coord_x = tmp_x;

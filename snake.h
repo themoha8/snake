@@ -7,7 +7,6 @@
 #endif
 */
 #pragma once
-#include "interface.h"
 
 enum game_t {
 	game_over = 0,
