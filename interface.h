@@ -14,5 +14,5 @@ enum choice_t {
 	exit_choice = 2,
 };
 
-int term_setup(HANDLE out_handle);
-enum choice_t menu(HANDLE in_handle);
+int term_setup(HANDLE out_handle, HWND win_handle);
+enum choice_t menu(HANDLE in_handle, int win_width, int win_height);

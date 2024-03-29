@@ -11,16 +11,17 @@ enum {
 	//---------------------------
 	t_red = 31,
 	t_green = 32,
+	t_yellow = 33,
 	t_blue = 34,
 	t_magenta = 35,
-	t_white = 37,
+	t_cyan = 36,
+	t_white = 37
 	//---------------------------
 };
 
-int term_setup(HANDLE out_handle)
+int term_setup(HANDLE out_handle, HWND win_handle)
 {
 	DWORD out_cls_mode;
-	int res;
 
 	// setup console (enable sequence control)
 	if (!GetConsoleMode(out_handle, &out_cls_mode)) {
@@ -35,18 +36,15 @@ int term_setup(HANDLE out_handle)
 	// set console title
 	wprintf_s(L"\x1b]0;Snake\x1b\x5c");
 
-	// set console size (win_size_w, win_size_h)
-	res = _wsystem(L"mode 80, 25");
-	if (res == -1) {
-		return ERROR_INVALID_FUNCTION;
-	}
+	// set max console size
+	ShowWindow(win_handle, SW_MAXIMIZE);
 
 	// hide cursor
 	wprintf_s(L"\x1b[?25l");
 	return ERROR_SUCCESS;
 }
 
-enum choice_t menu(HANDLE in_handle)
+enum choice_t menu(HANDLE in_handle, int win_width, int win_height)
 {
 	int start_color = t_blue;
 	int exit_color = t_white;
@@ -57,19 +55,19 @@ enum choice_t menu(HANDLE in_handle)
 
 	// clear screen
 	wprintf_s(L"\x1b[2J");
-	
+
 	while (pressed_key != enter_key) {
 		// draw color
 		wprintf_s(L"\x1b[%dm", start_color);
 		// set cursor position
-		wprintf_s(L"\x1b[%d;%dH", 25 / 2, (80 - 5) / 2);
+		wprintf_s(L"\x1b[%d;%dH", win_height / 2, (win_width - 5) / 2);
 		// output text
 		wprintf_s(L"Start");
 
 		// draw color
 		wprintf_s(L"\x1b[%dm", exit_color);
 		// set cursor position
-		wprintf_s(L"\x1b[%d;%dH", (25 / 2) + 2, (80 - 5) / 2);
+		wprintf_s(L"\x1b[%d;%dH", (win_height / 2) + 2, (win_width - 5) / 2);
 		// output text
 		wprintf_s(L"Exit");
 
@@ -80,14 +78,14 @@ enum choice_t menu(HANDLE in_handle)
 			start_color = t_blue;
 			exit_color = t_white;
 			PlaySoundW(L"res\\Click.wav", NULL, SND_FILENAME | SND_ASYNC);
-			Sleep(350); // pause
+			Sleep(150); // pause
 		}
 		else if ((pressed_key == L's' || pressed_key == L'S') && choice == start_choice) {
 			choice++; // choice = exit_choice
 			start_color = t_white;
 			exit_color = t_blue;
 			PlaySoundW(L"res\\Click.wav", NULL, SND_FILENAME | SND_ASYNC);
-			Sleep(350); // pause
+			Sleep(150); // pause
 		}
 	}
 	// clear screen

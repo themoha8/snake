@@ -5,7 +5,15 @@
 
 enum {
 	snake_speed = 10,
-	esc_key = 27
+	esc_key = 27,
+	// -------------------------
+	t_red = 31,
+	t_green = 32,
+	t_yellow = 33,
+	t_blue = 34,
+	t_magenta = 35,
+	t_cyan = 36,
+	t_white = 37
 };
 
 enum direction_t {
@@ -23,32 +31,39 @@ static void draw_snake(int x, int y)
 	putwchar(L'@');
 }
 
-int game_init(HANDLE out_handle, struct snake_t *snake)
+void static create_map(HANDLE out_handle, int win_width, int win_height, int map_color)
+{
+	int x, y;
+
+	// clear screen
+	wprintf_s(L"\x1b[2J");
+
+	// set color yellow
+	wprintf_s(L"\x1b[33m");
+
+	for (y = 0; y < win_height - 7; y++) {
+		for (x = 0; x < win_width; x++) {
+			if (x == 0 || x == win_width - 1 || y == 0 || y == win_height - 8) {
+				putwchar(L'#');
+			}
+			else
+				putwchar(L' ');
+		}
+	}
+	// draw help
+	wprintf_s(L"\x1b[%d;55H", win_height-9);
+	wprintf_s(L"escape key - exit to menu");
+
+	draw_score(0, win_height, map_color);
+}
+
+int game_init(HANDLE out_handle, struct snake_t *snake, int win_width, int win_height, int map_color)
 {
 	HANDLE file_handle;
 	wchar_t map_buf[2048];
 	DWORD num_of_bytes_read;
 
-	file_handle = CreateFileW(L"map.txt", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (file_handle == INVALID_HANDLE_VALUE) {
-		return GetLastError();
-	}
-
-	// set color yellow
-	wprintf_s(L"\x1b[33m");
-
-	// set cursor position
-	wprintf_s(L"\x1b[0;0H");
-
-	// draw map
-	while (ReadFile(file_handle, map_buf, 2048, &num_of_bytes_read, NULL) && num_of_bytes_read > 0) {
-		WriteConsoleA(out_handle, map_buf, num_of_bytes_read, NULL, NULL);
-	}
-	CloseHandle(file_handle);
-
-	// draw help
-	wprintf_s(L"\x1b[22;55H");
-	wprintf_s(L"escape key - exit to menu");
+	create_map(out_handle, win_width, win_height, map_color);
 
 	// init snake
 	snake->coord_x = 80 / 2;
@@ -61,12 +76,12 @@ int game_init(HANDLE out_handle, struct snake_t *snake)
 	return ERROR_SUCCESS;
 }
 
-static void score(int value)
+static void draw_score(int value, int win_height, int color)
 {
 	// set cursor position
-	wprintf_s(L"\x1b[22;0H");
+	wprintf_s(L"\x1b[%d;0H", win_height-8);
 	// set color yellow
-	wprintf_s(L"\x1b[33m");
+	wprintf_s(L"\x1b[%dm", color);
 	// draw score
 	wprintf_s(L"Score: %d", value);
 }
@@ -112,7 +127,7 @@ enum game_t game_controller(HANDLE in_handle, struct snake_t *snake)
 	// draw snake
 	draw_snake(snake->coord_x, snake->coord_y);
 	// draw score
-	score(0);
+	//score(0);
 
 	// step_event (game time step)
 	// allows you to adjust the speed of the program.
@@ -138,7 +153,7 @@ void game_update(struct snake_t *snake)
 	wprintf_s(L"\x1b[%d;%dH", snake->coord_y, snake->coord_x);
 	// clear snake
 	putwchar(L' ');
-	Sleep(2000);
+
 	if (snake->direction == L'w' || snake->direction == L'W') {
 		tmp_y--;
 		if (tmp_y == 1)
