@@ -7,6 +7,14 @@
 
 enum {
 	enter_key = 13,
+	// ----------------------
+	t_red = 31,
+	t_green = 32,
+	t_yellow = 33,
+	t_blue = 34,
+	t_magenta = 35,
+	t_cyan = 36,
+	t_white = 37
 };
 
 int term_setup(HANDLE out_handle, HWND win_handle)
@@ -29,12 +37,27 @@ int term_setup(HANDLE out_handle, HWND win_handle)
 	// set max console size
 	ShowWindow(win_handle, SW_MAXIMIZE);
 
-	// hide cursor
-	wprintf_s(L"\x1b[?25l");
 	return ERROR_SUCCESS;
 }
 
-enum choice_t menu(HANDLE in_handle, const struct win_settings_t *win_settings)
+int check_window_size(const struct win_settings_t* win_settings) {
+	if (win_settings->win_width < 40 || win_settings->win_height < 20) {
+		// clear screen
+		wprintf_s(L"\x1b[2J");
+		// hide cursor
+		wprintf_s(L"\x1b[?25l");
+		// set color
+		wprintf_s(L"\x1b[%dm", win_settings->map_color);
+		// set cursor position
+		wprintf_s(L"\x1b[0;0H");
+		wprintf_s(L"Increase window size!\n");
+		Sleep(2000);
+		return 0;
+	}
+	return 1;
+}
+
+enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* win_settings)
 {
 	int start_color = win_settings->start_color;
 	int exit_color = win_settings->exit_color;
@@ -42,19 +65,30 @@ enum choice_t menu(HANDLE in_handle, const struct win_settings_t *win_settings)
 	wchar_t pressed_key = L'0'; // undef
 	INPUT_RECORD in_buf;
 	DWORD num_of_events;
+	CONSOLE_SCREEN_BUFFER_INFO win_info;
 
 	// clear screen
 	wprintf_s(L"\x1b[2J");
 
+	// hide cursor
+	wprintf_s(L"\x1b[?25l");
+
+	GetConsoleScreenBufferInfo(out_handle, &win_info);
+	win_settings->win_width = win_info.srWindow.Right - win_info.srWindow.Left + 1;
+	win_settings->win_height = win_info.srWindow.Bottom - win_info.srWindow.Top + 1;
+
+	if (!check_window_size(win_settings))
+		return choice;
+
 	while (pressed_key != enter_key) {
-		// draw color
+		// set color
 		wprintf_s(L"\x1b[%dm", start_color);
 		// set cursor position
 		wprintf_s(L"\x1b[%d;%dH", win_settings->win_height / 2, (win_settings->win_width - 5) / 2);
 		// output text
 		wprintf_s(L"Start");
 
-		// draw color
+		// set color
 		wprintf_s(L"\x1b[%dm", exit_color);
 		// set cursor position
 		wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height / 2) + 2, (win_settings->win_width - 5) / 2);

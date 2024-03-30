@@ -6,9 +6,22 @@
 enum {
 	snake_speed = 10,
 	esc_key = 27,
+	// ----------------------
+	t_red = 31,
+	t_green = 32,
+	t_yellow = 33,
+	t_blue = 34,
+	t_magenta = 35,
+	t_cyan = 36,
+	t_white = 37
 };
 
-void draw_snake(const struct snake_t* snake)
+enum direction_t {
+	stop = 0,
+	crashed = 1
+};
+
+static void draw_snake(const struct snake_t* snake)
 {
 	// set snake position
 	wprintf_s(L"\x1b[%d;%dH", snake->coord_y, snake->coord_x);
@@ -18,7 +31,7 @@ void draw_snake(const struct snake_t* snake)
 	putwchar(L'@');
 }
 
-void create_map(HANDLE out_handle, const struct win_settings_t *win_settings)
+static void create_map(HANDLE out_handle, const struct win_settings_t *win_settings)
 {
 	int x, y;
 
@@ -47,24 +60,26 @@ void create_map(HANDLE out_handle, const struct win_settings_t *win_settings)
 
 	draw_score(0, win_settings->win_height, win_settings->score_color);
 }
-/*
-int game_init(HANDLE out_handle, struct snake_t *snake, const struct win_settings_t* win_settings)
+
+void game_init(HANDLE out_handle, struct snake_t *snake, const struct win_settings_t* win_settings)
 {
+	if (!check_window_size(win_settings))
+		return;
+
 	create_map(out_handle, win_settings);
 
 	// init snake
 	snake->coord_x = win_settings->win_width / 2;
-	snake->coord_y = win_settings->win_height / 2;
+	snake->coord_y = (win_settings->win_height - 8) / 2;
 	snake->direction = stop;
 	snake->speed = 100;
-	snake->color = snake->color;
+	snake->color = t_red;
 
 	draw_snake(snake);
-
-	return ERROR_SUCCESS;
+	draw_score(0, win_settings->win_height, win_settings->score_color);
 }
-*/
-void draw_score(int value, int win_height, int score_color)
+
+static void draw_score(int value, int win_height, int score_color)
 {
 	// set cursor position
 	wprintf_s(L"\x1b[%d;0H", win_height-6);
@@ -74,7 +89,7 @@ void draw_score(int value, int win_height, int score_color)
 	wprintf_s(L"Score: %d", value);
 }
 
-void key_check(HANDLE in_handle, wchar_t *pressed_key)
+static void key_check(HANDLE in_handle, wchar_t *pressed_key)
 {
 	INPUT_RECORD in_buf;
 	DWORD num_of_events;

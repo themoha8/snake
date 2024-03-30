@@ -25,4 +25,5 @@ struct win_settings_t {
 };
 
 int term_setup(HANDLE out_handle, HWND win_handle);
-enum choice_t menu(HANDLE in_handle, const struct win_settings_t *win_settings);
+enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* win_settings);
+int check_window_size(const struct win_settings_t* win_settings);
