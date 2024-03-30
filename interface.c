@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <stdio.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 #include "interface.h"
 
 #pragma comment(lib, "Winmm.lib")

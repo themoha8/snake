@@ -55,18 +55,11 @@ int main(void)
 
 	// menu while
 	while (menu(in_handle, out_handle, &win_settings) == start_choice) {
-	//	create_map(out_handle, &win_settings);
-	//	draw_snake(&snake);
-	//	wprintf_s(L"%d\n", i++);
-	//	Sleep(2000);
 		game_init(out_handle, &snake, &win_settings);
-		Sleep(2000);
-		/*
 		// game while
-		while ((game_controller(in_handle, &snake)) != game_over) {
-			game_update(&snake);
+		while ((game_controller(in_handle, &snake, &win_settings)) != game_over) {
+			game_update(&snake, &win_settings);
 		}
-		*/
 	}
 
 	//Sleep(10000);

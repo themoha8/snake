@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <conio.h>
 #include "snake.h"
 
 enum {
@@ -21,6 +22,11 @@ enum direction_t {
 	crashed = 1
 };
 
+struct food_t {
+	int x;
+	int y;
+};
+
 static void draw_snake(const struct snake_t* snake)
 {
 	// set snake position
@@ -29,6 +35,16 @@ static void draw_snake(const struct snake_t* snake)
 	wprintf_s(L"\x1b[%dm", snake->color);
 	// draw snake
 	putwchar(L'@');
+}
+
+static void draw_score(int value, int win_height, int score_color)
+{
+	// set cursor position
+	wprintf_s(L"\x1b[%d;0H", win_height - 6);
+	// set color
+	wprintf_s(L"\x1b[%dm", score_color);
+	// draw score
+	wprintf_s(L"Score: %d", value);
 }
 
 static void create_map(HANDLE out_handle, const struct win_settings_t *win_settings)
@@ -72,23 +88,15 @@ void game_init(HANDLE out_handle, struct snake_t *snake, const struct win_settin
 	snake->coord_x = win_settings->win_width / 2;
 	snake->coord_y = (win_settings->win_height - 8) / 2;
 	snake->direction = stop;
-	snake->speed = 100;
+	snake->speed = 400;
 	snake->color = t_red;
+	snake->score = 0;
 
 	draw_snake(snake);
-	draw_score(0, win_settings->win_height, win_settings->score_color);
+	draw_score(snake->score, win_settings->win_height, win_settings->score_color);
 }
 
-static void draw_score(int value, int win_height, int score_color)
-{
-	// set cursor position
-	wprintf_s(L"\x1b[%d;0H", win_height-6);
-	// set color
-	wprintf_s(L"\x1b[%dm", score_color);
-	// draw score
-	wprintf_s(L"Score: %d", value);
-}
-
+/*
 static void key_check(HANDLE in_handle, wchar_t *pressed_key)
 {
 	INPUT_RECORD in_buf;
@@ -101,19 +109,23 @@ static void key_check(HANDLE in_handle, wchar_t *pressed_key)
 	if (num_of_events > 0) {
 		ReadConsoleInputW(in_handle, &in_buf, 1, &num_of_events);
 		*pressed_key = in_buf.Event.KeyEvent.uChar.UnicodeChar;
+		FlushConsoleInputBuffer(in_handle);
 	}
 }
+*/
 
-/*
-enum game_t game_controller(HANDLE in_handle, struct snake_t *snake)
+enum game_t game_controller(HANDLE in_handle, struct snake_t *snake, const struct win_settings_t* win_settings)
 {
-	wchar_t pressed_key;
+	wchar_t pressed_key = L'0';
 
 	// key_event
-	key_check(in_handle, &pressed_key);
-	if (pressed_key == esc_key) {
+	if (_kbhit() != 0)
+		pressed_key = _getwch();
+
+	if (pressed_key == esc_key || snake->direction == crashed) {
 		return game_over;
 	}
+
 	else if (pressed_key == L'w' || pressed_key == L'W' ||
 		pressed_key == L'a' || pressed_key == L'A' ||
 		pressed_key == L's' || pressed_key == L'S' ||
@@ -126,32 +138,26 @@ enum game_t game_controller(HANDLE in_handle, struct snake_t *snake)
 		// ---> draw snake
 		// ---> draw score
 		// ---> draw panel
-		
-	// draw snake
 	draw_snake(snake);
-	// draw score
-	//score(0);
+	draw_score(snake->score, win_settings->win_height, win_settings->score_color);
 
 	// step_event (game time step)
 	// allows you to adjust the speed of the program.
 	// eliminates flicker. 
 	// frame rendering speed
-	if (snake->direction == crashed) {
-		return game_over;
-	}
-	Sleep(16);
+	//Sleep(30);
 	return playing;
 }
 
 // makes all changes in the game
-void game_update(struct snake_t *snake)
+void game_update(struct snake_t *snake, const struct win_settings_t* win_settings)
 {
 	int tmp_x, tmp_y;
 
 	tmp_x = snake->coord_x;
 	tmp_y = snake->coord_y;
 
-	Sleep(snake->speed); // own snake speed
+	Sleep(snake->speed);
 	// set cursor position
 	wprintf_s(L"\x1b[%d;%dH", snake->coord_y, snake->coord_x);
 	// clear snake
@@ -173,17 +179,16 @@ void game_update(struct snake_t *snake)
 	}
 	else if(snake->direction == L's' || snake->direction == L'S') {
 		tmp_y++;
-		if (tmp_y == 21) // wall
+		if (tmp_y == win_settings->win_height - 7) // wall
 			snake->direction = crashed;
 		else
 			snake->coord_y = tmp_y;
 	}
 	else if (snake->direction == L'd' || snake->direction == L'D') {
 		tmp_x++;
-		if (tmp_x == 79)
+		if (tmp_x == win_settings->win_width)
 			snake->direction = crashed;
 		else
 			snake->coord_x = tmp_x;
 	}
 }
-*/
