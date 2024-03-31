@@ -19,8 +19,10 @@ int main(void)
 	HANDLE out_handle;
 	HANDLE in_handle;
 	HWND win_handle;
+	struct fruit_t fruit;
 	struct snake_t snake;
 	struct win_settings_t win_settings;
+	struct snake_tail_t *snake_tail = NULL;
 	int res, i = 0;
 
 	out_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -55,10 +57,10 @@ int main(void)
 
 	// menu while
 	while (menu(in_handle, out_handle, &win_settings) == start_choice) {
-		game_init(out_handle, &snake, &win_settings);
+		game_init(out_handle, &snake, &win_settings, &fruit);
 		// game while
-		while ((game_controller(in_handle, &snake, &win_settings)) != game_over) {
-			game_update(&snake, &win_settings);
+		while ((game_controller2(in_handle, &snake, &win_settings, &fruit, &snake_tail)) != game_over) {
+			game_update2(&snake, &win_settings, &fruit, &snake_tail);
 		}
 	}
 

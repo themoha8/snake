@@ -41,7 +41,7 @@ int term_setup(HANDLE out_handle, HWND win_handle)
 }
 
 int check_window_size(const struct win_settings_t* win_settings) {
-	if (win_settings->win_width < 40 || win_settings->win_height < 20) {
+	if (win_settings->win_width < 45 || win_settings->win_height < 15) {
 		// clear screen
 		wprintf_s(L"\x1b[2J");
 		// hide cursor
@@ -59,6 +59,7 @@ int check_window_size(const struct win_settings_t* win_settings) {
 
 enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* win_settings)
 {
+	int tmp_win_width, tmp_win_height;
 	int start_color = win_settings->start_color;
 	int exit_color = win_settings->exit_color;
 	enum choice_t choice = start_choice;
@@ -66,21 +67,53 @@ enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* w
 	INPUT_RECORD in_buf;
 	DWORD num_of_events;
 	CONSOLE_SCREEN_BUFFER_INFO win_info;
-
-	// clear screen
+	
+	// clear screen 
 	wprintf_s(L"\x1b[2J");
 
 	// hide cursor
 	wprintf_s(L"\x1b[?25l");
 
+	/*
 	GetConsoleScreenBufferInfo(out_handle, &win_info);
 	win_settings->win_width = win_info.srWindow.Right - win_info.srWindow.Left + 1;
 	win_settings->win_height = win_info.srWindow.Bottom - win_info.srWindow.Top + 1;
-
 	if (!check_window_size(win_settings))
 		return choice;
+	*/
 
 	while (pressed_key != enter_key) {
+		/*
+		// clear screen
+		wprintf_s(L"\x1b[2J");
+
+		// hide cursor
+		wprintf_s(L"\x1b[?25l");
+
+		GetConsoleScreenBufferInfo(out_handle, &win_info);
+		win_settings->win_width = win_info.srWindow.Right - win_info.srWindow.Left + 1;
+		win_settings->win_height = win_info.srWindow.Bottom - win_info.srWindow.Top + 1;
+		if (!check_window_size(win_settings))
+			continue;
+		*/
+
+		GetConsoleScreenBufferInfo(out_handle, &win_info);
+		tmp_win_width = win_settings->win_width;
+		tmp_win_height = win_settings->win_height;
+		win_settings->win_width = win_info.srWindow.Right - win_info.srWindow.Left + 1;
+		win_settings->win_height = win_info.srWindow.Bottom - win_info.srWindow.Top + 1;
+
+		if (!check_window_size(win_settings))
+			continue;
+
+		if (tmp_win_width != win_settings->win_width || tmp_win_height != win_settings->win_height) {
+			// clear screen
+			wprintf_s(L"\x1b[2J");
+
+			// hide cursor
+			wprintf_s(L"\x1b[?25l");
+		}
+
 		// set color
 		wprintf_s(L"\x1b[%dm", start_color);
 		// set cursor position
