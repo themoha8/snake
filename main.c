@@ -11,7 +11,7 @@ enum {
 	t_blue = 34,
 	t_magenta = 35,
 	t_cyan = 36,
-	t_white = 37
+	t_white = 37,
 };
 
 int main(void)
