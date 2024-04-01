@@ -5,6 +5,7 @@
 #include "snake.h"
 
 enum {
+	t_black = 30,
 	t_red = 31,
 	t_green = 32,
 	t_yellow = 33,
@@ -23,7 +24,7 @@ int main(void)
 	struct snake_t snake;
 	struct win_settings_t win_settings;
 	struct snake_tail_t *snake_tail = NULL;
-	int res, i = 0;
+	int res;
 
 	out_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (out_handle == INVALID_HANDLE_VALUE) {
@@ -53,7 +54,7 @@ int main(void)
 	win_settings.exit_color = t_white;
 	win_settings.map_color = t_yellow;
 	win_settings.panel_color = t_red;
-	win_settings.score_color = t_magenta;
+	win_settings.score_color = t_white;
 
 	// menu while
 	while (menu(in_handle, out_handle, &win_settings) == start_choice) {
@@ -63,8 +64,5 @@ int main(void)
 			game_update(&snake, &win_settings, &fruit, &snake_tail);
 		}
 	}
-
-	//Sleep(10000);
-
 	return 0;
 }

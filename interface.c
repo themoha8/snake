@@ -1,6 +1,5 @@
 #include <Windows.h>
 #include <stdio.h>
-//#include <stdbool.h>
 #include "interface.h"
 
 #pragma comment(lib, "Winmm.lib")
@@ -8,6 +7,7 @@
 enum {
 	enter_key = 13,
 	// ----------------------
+	t_black = 30,
 	t_red = 31,
 	t_green = 32,
 	t_yellow = 33,

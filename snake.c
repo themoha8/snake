@@ -1,12 +1,11 @@
 #include <Windows.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <conio.h>
 #include "snake.h"
 
 enum {
 	wall_height_shift = 3,
-	max_tail = 50,
+	//max_tail = 50,
 	// ----------------------
 	snake_speed = 10,
 	esc_key = 27,
@@ -30,11 +29,11 @@ enum direction_t {
 
 static void draw_snake(const struct snake_t* snake)
 {
-	// set snake position
+	// set cursor position
 	wprintf_s(L"\x1b[%d;%dH", snake->coord_y, snake->coord_x);
-	// set snake color
+	// set color
 	wprintf_s(L"\x1b[%dm", snake->color);
-	// draw snake
+	// draw snake head
 	putwchar(L'@');
 }
 
@@ -45,11 +44,11 @@ static void draw_score(int value, int win_height, int score_color)
 	// set color (font)
 	wprintf_s(L"\x1b[%dm", score_color);
 	// set coloor (back)
-	wprintf_s(L"\x1b[%dm", t_white_back);
+	//wprintf_s(L"\x1b[%dm", t_white_back);
 	// draw score
 	wprintf_s(L"Score: %d", value);
 	// set default color
-	wprintf_s(L"\x1b[0m");
+	//wprintf_s(L"\x1b[0m");
 }
 
 static void draw_help(const struct win_settings_t* win_settings)
@@ -61,10 +60,11 @@ static void draw_help(const struct win_settings_t* win_settings)
 	// draw help
 	wprintf_s(L"\x1b[%d;%dH", win_settings->win_height, (win_settings->win_width - 41) / 2);
 	wprintf_s(L"Esc - back to the menu, P - pause the game");
+	// set default color
 	wprintf_s(L"\x1b[%dm", 0);
 }
 
-static void create_map(HANDLE out_handle, const struct win_settings_t *win_settings)
+static void create_map(HANDLE out_handle, const struct win_settings_t* win_settings)
 {
 	int x, y;
 
@@ -74,7 +74,7 @@ static void create_map(HANDLE out_handle, const struct win_settings_t *win_setti
 	// set color yellow
 	wprintf_s(L"\x1b[%dm", win_settings->map_color);
 
-	// set position
+	// set cursor position
 	wprintf_s(L"\x1b[0;0H");
 
 	for (y = 0; y < win_settings->win_height - wall_height_shift; y++) {
@@ -122,7 +122,7 @@ static void create_fruit(struct fruit_t* fruit)
 	fruit->color = t_green;
 }
 
-void game_init(HANDLE out_handle, struct snake_t *snake, const struct win_settings_t* win_settings, struct fruit_t *fruit)
+void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit)
 {
 	create_map(out_handle, win_settings);
 
@@ -139,20 +139,20 @@ void game_init(HANDLE out_handle, struct snake_t *snake, const struct win_settin
 	// init food
 	create_fruit(fruit);
 
-	draw_snake(snake);
+	//draw_snake(snake);
 	draw_score(snake->score, win_settings->win_height - wall_height_shift + 1, win_settings->score_color);
 }
 
-static void draw_snake_tail2(const struct snake_tail_t** snake_tail, int color)
+static void draw_snake_tail(const struct snake_tail_t** snake_tail, int color)
 {
 	const struct snake_tail_t* tmp_snake_tail = *snake_tail;
 	// set color
 	wprintf_s(L"\x1b[%dm", color);
 	while (tmp_snake_tail) {
-		// set position
 		if (tmp_snake_tail->x != 0 || tmp_snake_tail->y != 0) {
-			wprintf_s(L"\x1b[%d;%dH", tmp_snake_tail->y, tmp_snake_tail->x);
-			putwchar(L'o');
+		// set position
+		wprintf_s(L"\x1b[%d;%dH", tmp_snake_tail->y, tmp_snake_tail->x);
+		putwchar(L'o');
 		}
 		tmp_snake_tail = tmp_snake_tail->next;
 	}
@@ -197,7 +197,7 @@ enum game_t game_controller(HANDLE in_handle, struct snake_t* snake, const struc
 	draw_fruit(fruit);
 
 	if (snake->num_of_tail > 0)
-		draw_snake_tail2(&(*snake_tail), snake->color);
+		draw_snake_tail(&(*snake_tail), snake->color);
 
 
 	// step_event (game time step)
@@ -224,6 +224,8 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 
 	// catching a fruit
 	if (snake->coord_x == fruit->x && snake->coord_y == fruit->y) {
+		PlaySoundW(L"res\\Apple_bite.wav", NULL, SND_FILENAME | SND_ASYNC);
+		Sleep(50);
 		snake->num_of_tail++;
 		snake->score++;
 		tmp_snake_tail = (struct snake_tail_t*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct snake_tail_t));
@@ -337,71 +339,5 @@ static int check_coordinates(struct snake_t* snake, int max_map_width, int max_m
 		else
 			snake->coord_x = tmp_x;
 	}
-}
-
-static struct snake_str* inc_tail(const struct snake_str* lsnake, const struct map_str* map)
-{
-	struct snake_str* tmp = malloc(sizeof(struct snake_str));
-	tmp->x = lsnake->x;
-	tmp->y = lsnake->y;
-	tmp->dx = lsnake->dx;
-	tmp->dy = lsnake->dy;
-	tmp->dir = lsnake->dir;
-	tmp->next = NULL;
-
-	tmp->x -= tmp->dx;
-	check(&(tmp->x), map->max_x);
-	tmp->y -= tmp->dy;
-	check(&(tmp->y), map->max_y);
-
-	return tmp;
-}
-
-
-// makes all changes in the game
-void game_update2(struct snake_t* snake, const struct win_settings_t* win_settings)
-{
-	//int tmp_x, tmp_y;
-
-	//tmp_x = snake->coord_x;
-//	tmp_y = snake->coord_y;
-
-	Sleep(snake->speed);
-	// set cursor position
-	wprintf_s(L"\x1b[%d;%dH", snake->coord_y, snake->coord_x);
-	// clear snake
-	putwchar(L' ');
-
-	check_coordinates(snake, win_settings->win_width, win_settings->win_height - wall_height_shift);
-			/*
-			if (snake->direction == L'w' || snake->direction == L'W') {
-				tmp_y--;
-				if (tmp_y == 1)
-					snake->direction = crashed;
-				else
-					snake->coord_y = tmp_y;
-			}
-			else if (snake->direction == L'a' || snake->direction == L'A') {
-				tmp_x--;
-				if (tmp_x == 1) // wall
-					snake->direction = crashed;
-				else
-					snake->coord_x = tmp_x;
-			}
-			else if(snake->direction == L's' || snake->direction == L'S') {
-				tmp_y++;
-				if (tmp_y == win_settings->win_height - wall_height_shift) // wall
-					snake->direction = crashed;
-				else
-					snake->coord_y = tmp_y;
-			}
-			else if (snake->direction == L'd' || snake->direction == L'D') {
-				tmp_x++;
-				if (tmp_x == win_settings->win_width)
-					snake->direction = crashed;
-				else
-					snake->coord_x = tmp_x;
-			}
-			
 }
 */
