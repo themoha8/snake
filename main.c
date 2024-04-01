@@ -59,8 +59,8 @@ int main(void)
 	while (menu(in_handle, out_handle, &win_settings) == start_choice) {
 		game_init(out_handle, &snake, &win_settings, &fruit);
 		// game while
-		while ((game_controller2(in_handle, &snake, &win_settings, &fruit, &snake_tail)) != game_over) {
-			game_update2(&snake, &win_settings, &fruit, &snake_tail);
+		while ((game_controller(in_handle, &snake, &win_settings, &fruit, &snake_tail)) != game_over) {
+			game_update(&snake, &win_settings, &fruit, &snake_tail);
 		}
 	}
 

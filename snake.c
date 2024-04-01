@@ -80,10 +80,24 @@ static void create_map(HANDLE out_handle, const struct win_settings_t *win_setti
 	for (y = 0; y < win_settings->win_height - wall_height_shift; y++) {
 		for (x = 0; x < win_settings->win_width; x++) {
 			if (x == 0 || x == win_settings->win_width - 1 || y == 0 || y == win_settings->win_height - wall_height_shift - 1) {
+				wprintf_s(L"\x1b[%dm", win_settings->map_color);
 				putwchar(L'#');
 			}
 			else
 				putwchar(L' ');
+				/* {
+				//if ((x + y) % 2) { // chest
+				if(x % 2) { // beatifull
+					wprintf_s(L"\x1b[%dm", 42);
+					putwchar(L' ');
+				}
+				else {
+					wprintf_s(L"\x1b[%dm", 102);
+					putwchar(L' ');
+				}
+				wprintf_s(L"\x1b[%dm", 0);
+			} */
+
 		}
 	}
 
@@ -129,12 +143,6 @@ void game_init(HANDLE out_handle, struct snake_t *snake, const struct win_settin
 	draw_score(snake->score, win_settings->win_height - wall_height_shift + 1, win_settings->score_color);
 }
 
-static struct snake_tail_t *inc_tail(void)
-{
-	struct snake_tail_t *tmp = (struct snake_tail_t*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct snake_tail_t));
-	return tmp;
-}
-
 static void draw_snake_tail2(const struct snake_tail_t** snake_tail, int color)
 {
 	const struct snake_tail_t* tmp_snake_tail = *snake_tail;
@@ -150,7 +158,7 @@ static void draw_snake_tail2(const struct snake_tail_t** snake_tail, int color)
 	}
 }
 
-enum game_t game_controller2(HANDLE in_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail)
+enum game_t game_controller(HANDLE in_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail)
 {
 	wchar_t pressed_key = L'0';
 
@@ -201,7 +209,7 @@ enum game_t game_controller2(HANDLE in_handle, struct snake_t* snake, const stru
 }
 
 // makes all changes in the game
-void game_update2(struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail)
+void game_update(struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail)
 {
 	short tmp_x, tmp_y, prev_tail_x, prev_tail_y, tmp_tail_x, tmp_tail_y;
 	struct snake_tail_t* tmp_snake_tail;
@@ -214,19 +222,6 @@ void game_update2(struct snake_t* snake, const struct win_settings_t* win_settin
 	// clear snake
 	putwchar(L' ');
 
-	/*
-	// catching a fruit
-	if (snake->coord_x == fruit->x && snake->coord_y == fruit->y) {
-		//	if(snake->num_of_tail < max_tail)
-		snake->num_of_tail++;
-		snake->score++;
-		if (snake->num_of_tail == 1) {
-			*snake_tail = inc_tail();
-			(*snake_tail)->last = *snake_tail;
-		}
-		else
-			//(*snake_tail)->last = inc_tail();
-	*/
 	// catching a fruit
 	if (snake->coord_x == fruit->x && snake->coord_y == fruit->y) {
 		snake->num_of_tail++;
@@ -299,7 +294,7 @@ void game_update2(struct snake_t* snake, const struct win_settings_t* win_settin
 	if (snake->num_of_tail > 0) {
 		tmp_snake_tail = *snake_tail;
 		while (tmp_snake_tail) {
-			if (snake->coord_x == (*snake_tail)->x && snake->coord_y == (*snake_tail)->y)
+			if (snake->coord_x == tmp_snake_tail->x && snake->coord_y == tmp_snake_tail->y)
 				snake->direction = crashed;
 			tmp_snake_tail = tmp_snake_tail->next;
 		}

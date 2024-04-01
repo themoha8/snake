@@ -38,7 +38,5 @@ struct snake_tail_t {
 };
 
 void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t *fruit);
-enum game_t game_controller(HANDLE in_handle, struct snake_t *snake, const struct win_settings_t* win_settings, struct fruit_t *fruit, struct snake_tail_t *snake_tail);
-void game_update(struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t* snake_tail);
-enum game_t game_controller2(HANDLE in_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail);
-void game_update2(struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail);
+enum game_t game_controller(HANDLE in_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail);
+void game_update(struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail);
