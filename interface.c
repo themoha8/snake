@@ -57,6 +57,21 @@ int check_window_size(const struct win_settings_t* win_settings) {
 	return 1;
 }
 
+void static draw_logo(const struct win_settings_t* win_settings, int color)
+{
+	wprintf_s(L"\x1b[%dm", color);
+	wprintf_s(L"\x1b[%d;%dH", win_settings->win_height / 3, (win_settings->win_width - 33) / 2);
+	wprintf_s(L"  ____                 _");
+	wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height / 3) + 1, (win_settings->win_width - 33) / 2);
+	wprintf_s(L" / ___|  _ __    __ _ | | __ ___");
+	wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height / 3) + 2, (win_settings->win_width - 33) / 2);
+	wprintf(L" \\___ \\ |  _ \\  / _  || |/ // _ \\");
+	wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height / 3) + 3, (win_settings->win_width - 33) / 2);
+	wprintf_s(L"  ___) || | | || (_| ||   <|  __/");
+	wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height / 3) + 4, (win_settings->win_width - 33) / 2);
+	wprintf_s(L" |____/ |_| |_| \\____||_|\\_\\\\___|");
+}
+
 enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* win_settings)
 {
 	int tmp_win_width, tmp_win_height;
@@ -81,6 +96,10 @@ enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* w
 	if (!check_window_size(win_settings))
 		return choice;
 	*/
+	GetConsoleScreenBufferInfo(out_handle, &win_info);
+	win_settings->win_width = win_info.srWindow.Right - win_info.srWindow.Left + 1;
+	win_settings->win_height = win_info.srWindow.Bottom - win_info.srWindow.Top + 1;
+	draw_logo(win_settings, t_green);
 
 	while (pressed_key != enter_key) {
 		/*
@@ -112,6 +131,8 @@ enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* w
 
 			// hide cursor
 			wprintf_s(L"\x1b[?25l");
+
+			draw_logo(win_settings, t_green);
 		}
 
 		// set color
