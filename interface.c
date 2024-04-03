@@ -40,8 +40,8 @@ int term_setup(HANDLE out_handle, HWND win_handle)
 	return ERROR_SUCCESS;
 }
 
-int check_window_size(const struct win_settings_t* win_settings) {
-	if (win_settings->win_width < 45 || win_settings->win_height < 15) {
+static int check_window_size(const struct win_settings_t* win_settings) {
+	if (win_settings->win_width < 45 || win_settings->win_height < 31) {
 		// clear screen
 		wprintf_s(L"\x1b[2J");
 		// hide cursor
@@ -57,7 +57,7 @@ int check_window_size(const struct win_settings_t* win_settings) {
 	return 1;
 }
 
-void static draw_logo(const struct win_settings_t* win_settings, int color)
+static void draw_logo(const struct win_settings_t* win_settings, int color)
 {
 	wprintf_s(L"\x1b[%dm", color);
 	wprintf_s(L"\x1b[%d;%dH", win_settings->win_height / 3, (win_settings->win_width - 33) / 2);

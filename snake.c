@@ -115,8 +115,16 @@ static void draw_fruit(const struct fruit_t* fruit)
 	putwchar(1);
 }
 
-static void create_fruit(struct fruit_t* fruit)
+static void create_fruit(struct fruit_t* fruit) //int min, int max)
 {
+	//int random;
+
+//	srand(time(NULL));
+	// double number in order to get an exact number 
+//	random = rand() / (RAND_MAX + 1.0) * (max - min);
+
+
+
 	fruit->x = 15;
 	fruit->y = 15;
 	fruit->color = t_green;
