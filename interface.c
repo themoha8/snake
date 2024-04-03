@@ -41,7 +41,7 @@ int term_setup(HANDLE out_handle, HWND win_handle)
 }
 
 static int check_window_size(const struct win_settings_t* win_settings) {
-	if (win_settings->win_width < 45 || win_settings->win_height < 31) {
+	if (win_settings->win_width < 40 || win_settings->win_height < 15) {
 		// clear screen
 		wprintf_s(L"\x1b[2J");
 		// hide cursor

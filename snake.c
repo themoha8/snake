@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <conio.h>
+#include <time.h>
 #include "snake.h"
 
 enum {
@@ -34,7 +35,7 @@ static void draw_snake(const struct snake_t* snake)
 	// set color
 	wprintf_s(L"\x1b[%dm", snake->color);
 	// draw snake head
-	putwchar(L'@');
+	putwchar(L'o');
 }
 
 static void draw_score(int value, int win_height, int score_color)
@@ -115,19 +116,26 @@ static void draw_fruit(const struct fruit_t* fruit)
 	putwchar(1);
 }
 
-static void create_fruit(struct fruit_t* fruit) //int min, int max)
+static int check_fruit_on_tail(const struct snake_tail_t* snake_tail, struct fruit_t* fruit, int num_of_tail)
 {
-	//int random;
+	if (num_of_tail > 0) {
+		const struct snake_tail_t* tmp_snake_tail = snake_tail;
+		while (tmp_snake_tail) {
+			if (tmp_snake_tail->x == fruit->x && tmp_snake_tail->y == fruit->y)
+				return 1;
+			tmp_snake_tail = tmp_snake_tail->next;
+		}
+	}
+	return 0;
+}
 
-//	srand(time(NULL));
+static void create_fruit(struct fruit_t* fruit, int max_width, int max_height)
+{
+	srand((long)time(NULL));
 	// double number in order to get an exact number 
 //	random = rand() / (RAND_MAX + 1.0) * (max - min);
-
-
-
-	fruit->x = 15;
-	fruit->y = 15;
-	fruit->color = t_green;
+	fruit->x = rand() % (max_width - 2) + 1;
+	fruit->y = rand() % (max_height - wall_height_shift - 2) + 1;
 }
 
 void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit)
@@ -145,7 +153,10 @@ void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settin
 	snake->num_of_tail = 0;
 
 	// init food
-	create_fruit(fruit);
+	fruit->color = t_green;
+	do {
+		create_fruit(fruit, win_settings->win_width, win_settings->win_height);
+	} while (snake->coord_x == fruit->x && snake->coord_y == fruit->y);
 
 	//draw_snake(snake);
 	draw_score(snake->score, win_settings->win_height - wall_height_shift + 1, win_settings->score_color);
@@ -234,12 +245,16 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 	if (snake->coord_x == fruit->x && snake->coord_y == fruit->y) {
 		PlaySoundW(L"res\\Apple_bite.wav", NULL, SND_FILENAME | SND_ASYNC);
 		Sleep(50);
+
 		snake->num_of_tail++;
 		snake->score++;
 		tmp_snake_tail = (struct snake_tail_t*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct snake_tail_t));
 		tmp_snake_tail->next = *snake_tail;
 		*snake_tail = tmp_snake_tail;
-		create_fruit(fruit);
+		
+		do {
+			create_fruit(fruit, win_settings->win_width, win_settings->win_height);
+		} while ((snake->coord_x == fruit->x && snake->coord_y == fruit->y) || check_fruit_on_tail(*snake_tail, fruit, snake->num_of_tail));
 	}
 
 	if (snake->num_of_tail > 0) {
