@@ -44,7 +44,7 @@ static void draw_score(int value, int win_height, int score_color)
 	wprintf_s(L"\x1b[%d;0H", win_height);
 	// set color (font)
 	wprintf_s(L"\x1b[%dm", score_color);
-	// set coloor (back)
+	// set color (back)
 	//wprintf_s(L"\x1b[%dm", t_white_back);
 	// draw score
 	wprintf_s(L"Score: %d", value);
@@ -134,8 +134,8 @@ static void create_fruit(struct fruit_t* fruit, int max_width, int max_height)
 	srand((long)time(NULL));
 	// double number in order to get an exact number 
 //	random = rand() / (RAND_MAX + 1.0) * (max - min);
-	fruit->x = rand() % (max_width - 2) + 1;
-	fruit->y = rand() % (max_height - wall_height_shift - 2) + 1;
+	fruit->x = (rand() % (max_width - 1)) + 2;
+	fruit->y = (rand() % (max_height - 1)) + 2;
 }
 
 void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit)
@@ -146,7 +146,7 @@ void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settin
 	snake->coord_x = win_settings->win_width / 2;
 	snake->coord_y = (win_settings->win_height - wall_height_shift) / 2;
 	snake->direction = stop;
-	snake->speed = 200;
+	snake->speed = 150;
 	snake->color = t_red;
 	snake->score = 0;
 	snake->score_old = 0;
@@ -155,7 +155,7 @@ void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settin
 	// init food
 	fruit->color = t_green;
 	do {
-		create_fruit(fruit, win_settings->win_width, win_settings->win_height);
+		create_fruit(fruit, win_settings->win_width, win_settings->win_height - wall_height_shift);
 	} while (snake->coord_x == fruit->x && snake->coord_y == fruit->y);
 
 	//draw_snake(snake);
@@ -177,7 +177,31 @@ static void draw_snake_tail(const struct snake_tail_t** snake_tail, int color)
 	}
 }
 
-enum game_t game_controller(HANDLE in_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail)
+static void game_pause(HANDLE *out_handle, const struct win_settings_t *win_settings)
+{
+	wchar_t pressed_key = L'0';
+
+	while (pressed_key != L'P') {
+		// set color
+		wprintf_s(L"\x1b[%dm", t_magenta);
+		// set cursor position
+		wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height - wall_height_shift) / 2, (win_settings->win_width - 5) / 2);
+		wprintf_s(L"PAUSE");
+		Sleep(500);
+		// set color
+		wprintf_s(L"\x1b[%dm", t_blue);
+		// set cursor position
+		wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height - wall_height_shift) / 2, (win_settings->win_width - 5) / 2);
+		wprintf_s(L"pause");
+		Sleep(500);
+		if (_kbhit() != 0)
+			pressed_key = _getwch();
+	}
+	wprintf_s(L"\x1b[%d;%dH", (win_settings->win_height - wall_height_shift) / 2, (win_settings->win_width - 5) / 2);
+	wprintf_s(L"     ");
+}
+
+enum game_t game_controller(HANDLE in_handle, HANDLE out_handle, struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail)
 {
 	wchar_t pressed_key = L'0';
 
@@ -193,6 +217,8 @@ enum game_t game_controller(HANDLE in_handle, struct snake_t* snake, const struc
 				HeapFree(GetProcessHeap(), 0, tmp);
 			}
 		}
+		PlaySoundW(L"res\\Lose.wav", NULL, SND_FILENAME | SND_ASYNC);
+		Sleep(2500);
 		return game_over;
 	}
 	else if (pressed_key == L'w' || pressed_key == L'W' ||
@@ -201,6 +227,12 @@ enum game_t game_controller(HANDLE in_handle, struct snake_t* snake, const struc
 		pressed_key == L'd' || pressed_key == L'D') {
 
 		snake->direction = pressed_key;
+	}
+	else if(pressed_key == L'P') {
+		draw_snake(snake);
+		if (snake->num_of_tail > 0)
+			draw_snake_tail(&(*snake_tail), snake->color);
+		game_pause(out_handle, win_settings);
 	}
 
 	// draw_event
@@ -244,16 +276,18 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 	// catching a fruit
 	if (snake->coord_x == fruit->x && snake->coord_y == fruit->y) {
 		PlaySoundW(L"res\\Apple_bite.wav", NULL, SND_FILENAME | SND_ASYNC);
-		Sleep(50);
-
+		Sleep(70);
 		snake->num_of_tail++;
 		snake->score++;
+		if (snake->score % 5 == 0) {
+			snake->speed = snake->speed - 10;
+		}
 		tmp_snake_tail = (struct snake_tail_t*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct snake_tail_t));
 		tmp_snake_tail->next = *snake_tail;
 		*snake_tail = tmp_snake_tail;
 		
 		do {
-			create_fruit(fruit, win_settings->win_width, win_settings->win_height);
+			create_fruit(fruit, win_settings->win_width, win_settings->win_height - wall_height_shift);
 		} while ((snake->coord_x == fruit->x && snake->coord_y == fruit->y) || check_fruit_on_tail(*snake_tail, fruit, snake->num_of_tail));
 	}
 
@@ -309,7 +343,7 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 	}
 	else if (snake->direction == L'd' || snake->direction == L'D') {
 		tmp_x++;
-		if (tmp_x == win_settings->win_width)
+		if (tmp_x == win_settings->win_width) //wall
 			snake->direction = crashed;
 		else
 			snake->coord_x = tmp_x;

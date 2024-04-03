@@ -167,5 +167,7 @@ enum choice_t menu(HANDLE in_handle, HANDLE out_handle, struct win_settings_t* w
 			Sleep(200); // pause
 		}
 	}
+	PlaySoundW(L"res\\Click.wav", NULL, SND_FILENAME | SND_ASYNC);
+	Sleep(200);
 	return choice;
 }
