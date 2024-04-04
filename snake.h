@@ -35,6 +35,7 @@ struct snake_t {
 struct snake_tail_t {
 	short x;
 	short y;
+	short direction;
 	struct snake_tail_t* next;
 };
 

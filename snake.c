@@ -156,7 +156,7 @@ void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settin
 	// init food
 	fruit->color = t_green;
 	do {
-		create_fruit(fruit, win_settings->win_width, win_settings->win_height - wall_height_shift);
+		create_fruit(fruit, win_settings->win_width, win_settings->win_height - wall_height_shift - 1);
 	} while (snake->coord_x == fruit->x && snake->coord_y == fruit->y);
 
 	//draw_snake(snake);
@@ -170,9 +170,12 @@ static void draw_snake_tail(const struct snake_tail_t** snake_tail, int color)
 	wprintf_s(L"\x1b[%dm", color);
 	while (tmp_snake_tail) {
 		if (tmp_snake_tail->x != 0 || tmp_snake_tail->y != 0) {
-		// set position
-		wprintf_s(L"\x1b[%d;%dH", tmp_snake_tail->y, tmp_snake_tail->x);
-		putwchar(L'o');
+			// set position
+			wprintf_s(L"\x1b[%d;%dH", tmp_snake_tail->y, tmp_snake_tail->x);
+			if (tmp_snake_tail->direction == L'w' || tmp_snake_tail->direction == L's' || tmp_snake_tail->direction == L'W' || tmp_snake_tail->direction == L'S')
+				putwchar(L'|');
+			else if (tmp_snake_tail->direction == L'a' || tmp_snake_tail->direction == L'd' || tmp_snake_tail->direction == L'A' || tmp_snake_tail->direction == L'D')
+				putwchar(L'-');
 		}
 		tmp_snake_tail = tmp_snake_tail->next;
 	}
@@ -269,6 +272,7 @@ enum game_t game_controller(HANDLE in_handle, HANDLE out_handle, struct snake_t*
 void game_update(struct snake_t* snake, const struct win_settings_t* win_settings, struct fruit_t* fruit, struct snake_tail_t** snake_tail)
 {
 	short tmp_x, tmp_y, prev_tail_x, prev_tail_y, tmp_tail_x, tmp_tail_y;
+	short prev_tail_direction, prev_tail_direction2;
 	struct snake_tail_t* tmp_snake_tail;
 	tmp_x = snake->coord_x;
 	tmp_y = snake->coord_y;
@@ -293,7 +297,7 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 		*snake_tail = tmp_snake_tail;
 		
 		do {
-			create_fruit(fruit, win_settings->win_width, win_settings->win_height - wall_height_shift);
+			create_fruit(fruit, win_settings->win_width, win_settings->win_height - wall_height_shift - 1);
 		} while ((snake->coord_x == fruit->x && snake->coord_y == fruit->y) || check_fruit_on_tail(*snake_tail, fruit, snake->num_of_tail));
 	}
 
@@ -302,8 +306,10 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 		// before this, we will save the coordinates of the first tail for transmission to the next element
 		prev_tail_y = (*snake_tail)->y;
 		prev_tail_x = (*snake_tail)->x;
+		prev_tail_direction = (*snake_tail)->direction;
 		(*snake_tail)->x = tmp_x;
 		(*snake_tail)->y = tmp_y;
+		(*snake_tail)->direction = snake->direction;
 		// erase the first element of the tail
 		// set cursor position
 		if (prev_tail_x != 0 || prev_tail_y != 0) {
@@ -314,14 +320,17 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 		while (tmp_snake_tail) {
 			tmp_tail_x = tmp_snake_tail->x;
 			tmp_tail_y = tmp_snake_tail->y;
+			prev_tail_direction2 = tmp_snake_tail->direction;
 			if (tmp_tail_y != 0 || tmp_tail_x != 0) {
 				wprintf_s(L"\x1b[%d;%dH", tmp_tail_y, tmp_tail_x);
 				putwchar(L' ');
 			}
 			tmp_snake_tail->x = prev_tail_x;
 			tmp_snake_tail->y = prev_tail_y;
+			tmp_snake_tail->direction = prev_tail_direction;
 			prev_tail_x = tmp_tail_x;
 			prev_tail_y = tmp_tail_y;
+			prev_tail_direction = prev_tail_direction2;
 			tmp_snake_tail = tmp_snake_tail->next;
 		}
 	}
