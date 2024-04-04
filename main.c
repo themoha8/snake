@@ -25,6 +25,7 @@ int main(void)
 	struct win_settings_t win_settings;
 	struct snake_tail_t *snake_tail = NULL;
 	int res;
+	enum choice_t choice;
 
 	out_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (out_handle == INVALID_HANDLE_VALUE) {
@@ -50,14 +51,16 @@ int main(void)
 		return res;
 	}
 
-	win_settings.start_color = t_cyan;
-	win_settings.exit_color = t_white;
+	win_settings.choice_color = t_cyan;
+	win_settings.no_choice_color = t_white;
 	win_settings.map_color = t_yellow;
 	win_settings.panel_color = t_red;
 	win_settings.score_color = t_white;
 
 	// menu while
-	while (menu(in_handle, out_handle, &win_settings) == start_choice) {
+	while ((choice = menu(in_handle, out_handle, &win_settings)) != exit_choice) {
+		if (choice == about_choice)
+			continue;
 		game_init(out_handle, &snake, &win_settings, &fruit);
 		// game while
 		while ((game_controller(in_handle, out_handle, &snake, &win_settings, &fruit, &snake_tail)) != game_over) {

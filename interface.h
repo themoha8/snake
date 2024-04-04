@@ -12,14 +12,15 @@ enum choice_t {
 	error = 0,
 	start_choice = 1,
 	exit_choice = 2,
+	about_choice = 3
 };
 
 struct win_settings_t {
 	short win_width;
 	short win_height;
 	short map_color;
-	short start_color;
-	short exit_color;
+	short choice_color;
+	short no_choice_color;
 	short panel_color;
 	short score_color;
 };

@@ -1,0 +1,13 @@
+                        SNAKE
+
+Rules are very clear:
+If a snake will touch bordes - game over.
+If a snake will bite it's owne tail - game over.
+The snake must eat some fruits for becoming bigger and faster.
+By each eaten fruit you will gane some scores.
+
+Controls:
+Use the <a>,<d>,<w>,<s> keys for moving a snake.
+
+Music:
+Spineless
