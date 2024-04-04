@@ -137,8 +137,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="snake.h" />
     <ClInclude Include="interface.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="snake.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\snake.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
