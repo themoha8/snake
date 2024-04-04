@@ -29,6 +29,7 @@ struct snake_t {
 	short score;
 	short score_old;
 	short num_of_tail;
+	short acceleration;
 };
 
 struct snake_tail_t {

@@ -151,6 +151,7 @@ void game_init(HANDLE out_handle, struct snake_t* snake, const struct win_settin
 	snake->score = 0;
 	snake->score_old = 0;
 	snake->num_of_tail = 0;
+	snake->acceleration = 0;
 
 	// init food
 	fruit->color = t_green;
@@ -226,6 +227,11 @@ enum game_t game_controller(HANDLE in_handle, HANDLE out_handle, struct snake_t*
 		pressed_key == L's' || pressed_key == L'S' ||
 		pressed_key == L'd' || pressed_key == L'D') {
 
+		if (snake->direction == pressed_key && snake->acceleration < 100)
+			snake->acceleration += 10;
+		else if(snake->direction != pressed_key)
+			snake->acceleration = 0;
+
 		snake->direction = pressed_key;
 	}
 	else if(pressed_key == L'P') {
@@ -267,7 +273,7 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 	tmp_x = snake->coord_x;
 	tmp_y = snake->coord_y;
 
-	Sleep(snake->speed);
+	Sleep(snake->speed - snake->acceleration);
 	// set cursor position
 	wprintf_s(L"\x1b[%d;%dH", snake->coord_y, snake->coord_x);
 	// clear snake
