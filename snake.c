@@ -256,7 +256,8 @@ enum game_t game_controller(HANDLE in_handle, HANDLE out_handle, struct snake_t*
 
 		snake->direction = pressed_key;
 	}
-	else if(pressed_key == L'P') {
+	
+	if(pressed_key == L'P') {
 		draw_snake(snake);
 		if (snake->num_of_tail > 0)
 			draw_snake_tail(&(*snake_tail), snake->color);
@@ -308,7 +309,7 @@ void game_update(struct snake_t* snake, const struct win_settings_t* win_setting
 		Sleep(400);
 		snake->num_of_tail++;
 		snake->score++;
-		if (snake->score % 5 == 0) {
+		if (snake->score % 30 == 0) {
 			snake->speed = snake->speed - 5;
 		}
 		tmp_snake_tail = (struct snake_tail_t*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct snake_tail_t));
